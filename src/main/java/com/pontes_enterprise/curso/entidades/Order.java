@@ -2,16 +2,21 @@ package com.pontes_enterprise.curso.entidades;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import com.pontes_enterprise.curso.enums.OrderStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 //@JsonIgnore se queremos todos os pedidos associados a um cliente, tiramos o jsonIgnore no user
@@ -19,12 +24,11 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "tb_order")
 public class Order implements Serializable{
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'",timezone = "GMT")
     private Instant moment;
 
     private Integer orderStatus;//Na base de dados, queremos o codigo
@@ -34,6 +38,15 @@ public class Order implements Serializable{
     @JoinColumn(name = "client_id")//Nome que vai aparecer na tabela
     private User client;
     //Uma ordem esta associada a um cliente
+
+
+    @OneToMany(mappedBy = "id.order")//no orderitem temos o id que lá tem o pedido e o produto, aqui pedimos o pedido
+    private Set<OrderItem> items = new HashSet<>();
+
+    //No caso de 1 para 1 para mapeamos os dois, para ter o mesmo id, caso o pedido seja 5, no pagamento o id de pedido
+    //tmb vai ser 5, é obrigatorio, com o mesmo id meter o cascade
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payment;
 
     public Order(){}
 
@@ -79,13 +92,23 @@ public class Order implements Serializable{
         this.client = client;
     }
 
+    public Payment getPayment(){
+        return payment;
+    }
+
+    public void setPayment(Payment payment){
+        this.payment= payment;
+    }
+
+    public Set<OrderItem> getItems(){
+        return items;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((moment == null) ? 0 : moment.hashCode());
-        result = prime * result + ((client == null) ? 0 : client.hashCode());
         return result;
     }
 
@@ -103,17 +126,10 @@ public class Order implements Serializable{
                 return false;
         } else if (!id.equals(other.id))
             return false;
-        if (moment == null) {
-            if (other.moment != null)
-                return false;
-        } else if (!moment.equals(other.moment))
-            return false;
-        if (client == null) {
-            if (other.client != null)
-                return false;
-        } else if (!client.equals(other.client))
-            return false;
         return true;
     }
+
+
+    
     
 }

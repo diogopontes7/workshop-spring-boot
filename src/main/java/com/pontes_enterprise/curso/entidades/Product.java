@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,11 +13,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_product")
 public class Product implements Serializable{
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,10 +31,12 @@ public class Product implements Serializable{
 
     //Um produto tem varias categorias, todas diferentes
     @ManyToMany//Muitos pra muitos
-    @JoinTable(name = "tb_product_category", 
-    joinColumns = @JoinColumn(name = "product_id"),//Chave estrangeira associado ao produto
-    inverseJoinColumns = @JoinColumn(name= "category_id"))//Nome da associacao e as chaves estrangeiras associadas
+    @JoinTable(name = "tb_product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))//Nome da associacao e as chaves estrangeiras associadas
     private Set<Category> categories = new HashSet<>();//Garante que a colecao comece vazia instanciada
+
+    //VAmos mapear de forma semelhante ao order, nos pra buscar os orders vamos atraves do Product
+    @OneToMany(mappedBy = "id.product")
+    private Set<OrderItem> items = new HashSet<>();
 
     public Product(){}
 
@@ -84,6 +90,16 @@ public class Product implements Serializable{
 
     public Set<Category> getCategories() {
         return categories;
+    }
+
+    //Para cada orderItem vamos verificar o order associado a essa entidade
+    @JsonIgnore//Ao pedir os products, recebemos o 
+    public Set<Order> getOrders(){
+        Set<Order> set = new HashSet<>();
+        for(OrderItem x : items){
+            set.add(x.getOrder());//Tamos a percorrer a colecao items, vamos adicionar no conjunto o order associado a esse orderItem
+        }
+        return set;
     }
 
     @Override
