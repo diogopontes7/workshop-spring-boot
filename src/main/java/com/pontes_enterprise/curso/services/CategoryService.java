@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.pontes_enterprise.curso.entidades.Category;
 import com.pontes_enterprise.curso.repository.CategoryRepository;
+import com.pontes_enterprise.curso.services.exceptions.ResourceNotFoundException;
 
 @Service//Componente do spring do tipo Service, agora vai dar o AutoWired
 public class CategoryService {
@@ -22,6 +23,15 @@ public class CategoryService {
 
     public Category findById(Long id){
         Optional<Category> obj = repository.findById(id);
-        return obj.get();//Obter o valor do obj
+        return obj.orElseThrow(() -> new ResourceNotFoundException(id));//Obter o valor do obj
+    }
+
+    public Category insert(Category obj){
+        return repository.save(obj);
+    }
+
+
+    public void delete(Long id){
+
     }
 }

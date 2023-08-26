@@ -6,9 +6,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import com.pontes_enterprise.curso.entidades.Product;
 import com.pontes_enterprise.curso.repository.ProductRepository;
 //estas classes do service e resource sao feitas para atraves do postman ou, posteriormente, da web, obtermos os recursos de cada class
+import com.pontes_enterprise.curso.services.exceptions.ResourceNotFoundException;
 
 @Service//Componente do spring do tipo Service, agora vai dar o AutoWired
 public class ProductService {
@@ -23,6 +25,10 @@ public class ProductService {
 
     public Product findById(Long id){
         Optional<Product> obj = repository.findById(id);
-        return obj.get();//Obter o valor do obj
+        return obj.orElseThrow(() -> new ResourceNotFoundException(id));//Obter o valor do obj
+    }
+
+    public Product insert(Product obj){
+        return repository.save(obj);
     }
 }

@@ -6,8 +6,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import com.pontes_enterprise.curso.entidades.Order;
 import com.pontes_enterprise.curso.repository.OrderRepository;
+import com.pontes_enterprise.curso.services.exceptions.ResourceNotFoundException;
 
 @Service
 public class OrderService {
@@ -22,6 +24,10 @@ public class OrderService {
 
     public Order findById(Long id){
         Optional<Order> obj = repository.findById(id);
-        return obj.get();
+        return obj.orElseThrow(() -> new ResourceNotFoundException(id));
+    }
+
+    public Order insert(Order obj){
+        return repository.save(obj);
     }
 }

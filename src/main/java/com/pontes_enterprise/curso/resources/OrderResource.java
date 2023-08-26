@@ -1,15 +1,20 @@
 package com.pontes_enterprise.curso.resources;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.pontes_enterprise.curso.entidades.Order;
+
 import com.pontes_enterprise.curso.services.OrderService;
 
 //Controladores rest que vao ser dependes dos dados e da camada de serviço
@@ -37,5 +42,12 @@ public class OrderResource {
     public ResponseEntity<Order> findById(@PathVariable Long id){
         Order obj = service.findById(id);
         return ResponseEntity.ok().body(obj);
+    }
+
+    @PostMapping
+    public ResponseEntity<Order> insert(@RequestBody Order obj){
+        obj = service.insert(obj);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();//Opa nem sei,vi na net, pra dar o 201 que é mais certo
+        return ResponseEntity.created(uri).body(obj);//Quando vamos retormar um 201, temos o endereço do recurso que inserimos
     }
 }
